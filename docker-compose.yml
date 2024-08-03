@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  mongo:
+    image: mongo:latest
+    container_name: mongo
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - app-network
+
+  web:
+    build: ./web
+    container_name: web
+    env_file:
+      - .env
+    networks:
+      - app-network
+    depends_on:
+      - mongo
+
+  nginx:
+    build: ./nginx
+    container_name: nginx
+    ports:
+      - "80:80"
+    networks:
+      - app-network
+    depends_on:
+      - web
+
+  bot:
+    build: ./bot
+    container_name: bot
+    env_file:
+      - .env
+    networks:
+      - app-network
+    depends_on:
+      - mongo
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  mongo_data:
